@@ -28,38 +28,39 @@ public class ViewPager3D extends ViewPager {
 		}
 
 		private void onRelease() {
-			if (mAnimator!=null && mAnimator.isRunning()){
+			if (mAnimator != null && mAnimator.isRunning()) {
 				mAnimator.addListener(new AnimatorListener() {
-					
+
 					@Override
 					public void onAnimationStart(Animator animation) {
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						startAnimation(0);
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
 					}
 				});
 				mAnimator.cancel();
 			} else {
-				startAnimation(0);	
+				startAnimation(0);
 			}
 		}
-		private void startAnimation(final float target){
-			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll,target);
+
+		private void startAnimation(final float target) {
+			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll, target);
 			mAnimator.setInterpolator(new DecelerateInterpolator());
 			final float scale = Math.abs(target - mOverscroll);
 			mAnimator.setDuration((long) (ANIMATION_DURATION * scale));
 			mAnimator.start();
-			
+
 		}
 
 		private boolean isOverscrolling() {
@@ -122,10 +123,10 @@ public class ViewPager3D extends ViewPager {
 			boolean isFirstOrLast = (mScrollPosition == 0 || mScrollPosition == count);
 			if (isFirstOrLast) {
 				mIsDragging = true;
-				Log.i(DEBUG_TAG,"DRAGGING");
+				Log.i(DEBUG_TAG, "DRAGGING");
 
 			} else if (mIsDragging) {
-				Log.i(DEBUG_TAG,"NOT DRAGGING");
+				Log.i(DEBUG_TAG, "NOT DRAGGING");
 				mIsDragging = false;
 			}
 			if (mScrollState == SCROLL_STATE_IDLE) {
@@ -229,17 +230,17 @@ public class ViewPager3D extends ViewPager {
 			return false;
 		}
 		final int position = child.getLeft() / child.getWidth();
-		final boolean isFirstOrLast = position==0 || (position==getAdapter().getCount()-1);
-		if (mOverscrollEffect.isOverscrolling() && isFirstOrLast) {			
+		final boolean isFirstOrLast = position == 0 || (position == getAdapter().getCount() - 1);
+		if (mOverscrollEffect.isOverscrolling() && isFirstOrLast) {
 			final float dx = getWidth() / 2;
 			final int dy = getHeight() / 2;
 			t.getMatrix().reset();
 			mCamera.save();
-			final float translateZ = Math.abs(mOverscrollEffect.getOverscroll()) * 250;
-			final float translateX = -mOverscrollEffect.getOverscroll() * 150;
-			float degrees = 18-(float) (((180f / Math.PI) * Math.acos(mOverscrollEffect.getOverscroll())) / 5);
+			float translateZ = (float) (100 * Math.sin((Math.PI) * Math.abs(mOverscrollEffect.getOverscroll())));
+			float degrees = 18 - (float) (((180f / Math.PI) * Math.acos(mOverscrollEffect.getOverscroll())) / 5);
 
 			mCamera.rotateY(degrees);
+			mCamera.translate(0, 0, translateZ);
 			mCamera.getMatrix(t.getMatrix());
 			mCamera.restore();
 			t.getMatrix().preTranslate(-dx, -dy);
@@ -254,18 +255,17 @@ public class ViewPager3D extends ViewPager {
 			double degrees;
 			if (position > mScrollPosition) {
 				// right side
-				// dx = (getWidth() / 2) + ((getWidth() / 2) *
-				// mScrollPositionOffset);
 				degrees = -45 + ((180f / Math.PI) * Math.acos(1 - mScrollPositionOffset)) / 2;
 			} else {
 				// left side
-				// dx = (getWidth() / 2) - ((getWidth() / 2) *
-				// mScrollPositionOffset);
 				degrees = (90 - (180f / Math.PI) * Math.acos(mScrollPositionOffset)) / 2;
 			}
+			final float translateZ = (float) (100*Math.sin((Math.PI) * mScrollPositionOffset));
+
 			t.getMatrix().reset();
 			mCamera.save();
 			mCamera.rotateY((float) degrees);
+			mCamera.translate(0, 0,translateZ);
 			mCamera.getMatrix(t.getMatrix());
 			mCamera.restore();
 			// pivot point is center of child
