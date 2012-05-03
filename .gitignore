@@ -1,0 +1,6 @@
+.settings/
+.DS_Store
+obj/*
+bin/*
+gen/*
+libs/*
