@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-    <de.inovex.android.widgets.ViewPager3D
-        android:id="@+id/awesomepager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-<!-- 
+<de.inovex.android.widgets.ViewPager3D xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/awesomepager"
+    android:background="#ff000000"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+<!--
     <android.support.v4.view.ViewPager
         android:id="@+id/awesomepager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 -->
- 
-</LinearLayout>
