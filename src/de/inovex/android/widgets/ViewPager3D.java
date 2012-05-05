@@ -3,10 +3,13 @@ package de.inovex.android.widgets;
 import android.content.Context;
 import android.graphics.Camera;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
@@ -88,18 +91,21 @@ public class ViewPager3D extends ViewPager {
 		}
 	}
 
+	final private OverscrollEffect mOverscrollEffect = new OverscrollEffect();
+	final private Camera mCamera = new Camera();
+
 	private OnPageChangeListener mScrollListener;
 	private float mLastMotionX;
 	private int mActivePointerId;
-	final private OverscrollEffect mOverscrollEffect = new OverscrollEffect();
-	private Camera mCamera = new Camera();
 	private int mScrollPosition;
 	private float mScrollPositionOffset;
+	final private int mTouchSlop;
 
 	public ViewPager3D(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setStaticTransformationsEnabled(true);
-
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
 		super.setOnPageChangeListener(new MyOnPageChangeListener());
 	}
 
@@ -131,6 +137,8 @@ public class ViewPager3D extends ViewPager {
 			if (mScrollListener != null) {
 				mScrollListener.onPageScrollStateChanged(state);
 			}
+
+			Log.i(DEBUG_TAG, "SCROLL_STATE = " + state);
 			if (state == SCROLL_STATE_IDLE) {
 				mScrollPositionOffset = 0;
 			}
@@ -138,15 +146,30 @@ public class ViewPager3D extends ViewPager {
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-
-		final int action = ev.getAction();
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
 		switch (action) {
 		case MotionEvent.ACTION_DOWN: {
 			mLastMotionX = ev.getX();
 			mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
 			break;
 		}
+		case MotionEventCompat.ACTION_POINTER_DOWN: {
+			final int index = MotionEventCompat.getActionIndex(ev);
+			final float x = MotionEventCompat.getX(ev, index);
+			mLastMotionX = x;
+			mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+			break;
+		}
+		}
+		return super.onInterceptTouchEvent(ev);
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent ev) {
+
+		final int action = ev.getAction();
+		switch (action) {
 		case MotionEvent.ACTION_MOVE: {
 			if (mActivePointerId != INVALID_POINTER_ID) {
 				// Scroll to follow the motion event
@@ -164,12 +187,12 @@ public class ViewPager3D extends ViewPager {
 
 				if (scrollX < leftBound) {
 					if (leftBound == 0) {
-						float over = deltaX;
+						float over = deltaX+mTouchSlop;
 						mOverscrollEffect.setPull(over / width);
 					}
 				} else if (scrollX > rightBound) {
 					if (rightBound == lastItemIndex * widthWithMargin) {
-						float over = scrollX - rightBound;
+						float over = scrollX - rightBound-mTouchSlop;
 						mOverscrollEffect.setPull(over / width);
 					}
 				} else {
@@ -182,13 +205,6 @@ public class ViewPager3D extends ViewPager {
 		case MotionEvent.ACTION_CANCEL: {
 			mActivePointerId = INVALID_POINTER_ID;
 			mOverscrollEffect.onRelease();
-			break;
-		}
-		case MotionEventCompat.ACTION_POINTER_DOWN: {
-			final int index = MotionEventCompat.getActionIndex(ev);
-			final float x = MotionEventCompat.getX(ev, index);
-			mLastMotionX = x;
-			mActivePointerId = MotionEventCompat.getPointerId(ev, index);
 			break;
 		}
 		case MotionEvent.ACTION_POINTER_UP: {
