@@ -39,7 +39,7 @@ You can control the 3D effect with XML attributes:
 <de.inovex.android.widgets.ViewPager3D
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/view_pager"
-    app:OverscrollRotation="1.75"
+    app:overscroll_rotation ="1.75"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 ```
