@@ -283,7 +283,7 @@ public class ViewPager3D extends ViewPager {
 			final float dx = getWidth() / 2;
 			final int dy = getHeight() / 2;
 			t.getMatrix().reset();
-			final float translateZ = (float) (OVERSCROLL_Z_DISTANCE * Math.sin((Math.PI) * Math.abs(mOverscrollEffect.mOverscroll)));
+			final float translateZ = (float) (OVERSCROLL_Z_DISTANCE * Math.sin(Math.PI * Math.abs(mOverscrollEffect.mOverscroll)));
 			final float degrees = 90 / OVERSCROLL_ROTATION_SCALE - (float) ((RADIANS * Math.acos(mOverscrollEffect.mOverscroll)) / OVERSCROLL_ROTATION_SCALE);
 
 			mCamera.save();
