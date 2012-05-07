@@ -19,8 +19,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 public class ViewPager3D extends ViewPager {
 
 	/**
-	 * maximum overscroll rotation of the children is 90 /
-	 * OVERSCROLL_ROTATION_SCALE degrees
+	 * maximum overscroll rotation of the children is 90 divided by this value
 	 */
 	final static float OVERSCROLL_ROTATION_SCALE = 2f;
 
@@ -33,11 +32,22 @@ public class ViewPager3D extends ViewPager {
 	 * maximum z distanze during swipe
 	 */
 	final static float SWIPE_Z_DISTANCE = 100;
+	
+	/**
+	 * maximum rotation during swipe is 90 divided by this value
+	 */
+	final static float SWIPE_ROTATION_SCALE = 2;
+
+	/**
+	 * duration of overscroll animation in ms
+	 */
+	final private static int OVERSCROLL_ANIMATION_DURATION = 400;
+
 
 	@SuppressWarnings("unused")
 	private final static String DEBUG_TAG = ViewPager.class.getSimpleName();
-
 	private final static int INVALID_POINTER_ID = -1;
+	private final static double RADIANS = 180f / Math.PI;
 
 	/**
 	 * 
@@ -47,7 +57,6 @@ public class ViewPager3D extends ViewPager {
 	private class OverscrollEffect {
 		private float mOverscroll;
 		private Animator mAnimator;
-		private final static int ANIMATION_DURATION = 400;
 
 		/**
 		 * @param deltaDistance
@@ -59,7 +68,7 @@ public class ViewPager3D extends ViewPager {
 		}
 
 		/**
-		 * call when finger is released. starts to animate back to default
+		 * called when finger is released. starts to animate back to default
 		 * position
 		 */
 		private void onRelease() {
@@ -93,7 +102,7 @@ public class ViewPager3D extends ViewPager {
 			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll, target);
 			mAnimator.setInterpolator(new DecelerateInterpolator());
 			final float scale = Math.abs(target - mOverscroll);
-			mAnimator.setDuration((long) (ANIMATION_DURATION * scale));
+			mAnimator.setDuration((long) (OVERSCROLL_ANIMATION_DURATION * scale));
 			mAnimator.start();
 		}
 
@@ -184,6 +193,7 @@ public class ViewPager3D extends ViewPager {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
+		boolean callSuper = false;
 
 		final int action = ev.getAction();
 		switch (action) {
@@ -193,6 +203,7 @@ public class ViewPager3D extends ViewPager {
 			break;
 		}
 		case MotionEventCompat.ACTION_POINTER_DOWN: {
+			callSuper = true;
 			final int index = MotionEventCompat.getActionIndex(ev);
 			final float x = MotionEventCompat.getX(ev, index);
 			mLastMotionX = x;
@@ -248,12 +259,13 @@ public class ViewPager3D extends ViewPager {
 				final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
 				mLastMotionX = ev.getX(newPointerIndex);
 				mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+				callSuper = true;
 			}
 			break;
 		}
 		}
 
-		if (mOverscrollEffect.isOverscrolling()) {
+		if (mOverscrollEffect.isOverscrolling() && !callSuper) {
 			return true;
 		} else {
 			return super.onTouchEvent(ev);
@@ -272,7 +284,7 @@ public class ViewPager3D extends ViewPager {
 			final int dy = getHeight() / 2;
 			t.getMatrix().reset();
 			final float translateZ = (float) (OVERSCROLL_Z_DISTANCE * Math.sin((Math.PI) * Math.abs(mOverscrollEffect.mOverscroll)));
-			final float degrees = 90 / OVERSCROLL_ROTATION_SCALE - (float) (((180f / Math.PI) * Math.acos(mOverscrollEffect.mOverscroll)) / OVERSCROLL_ROTATION_SCALE);
+			final float degrees = 90 / OVERSCROLL_ROTATION_SCALE - (float) ((RADIANS * Math.acos(mOverscrollEffect.mOverscroll)) / OVERSCROLL_ROTATION_SCALE);
 
 			mCamera.save();
 			mCamera.rotateY(degrees);
@@ -291,10 +303,10 @@ public class ViewPager3D extends ViewPager {
 			double degrees;
 			if (position > mScrollPosition) {
 				// right side
-				degrees = -45 + ((180f / Math.PI) * Math.acos(1 - mScrollPositionOffset)) / 2;
+				degrees = -(90/SWIPE_ROTATION_SCALE) + (RADIANS * Math.acos(1 - mScrollPositionOffset)) / SWIPE_ROTATION_SCALE;
 			} else {
 				// left side
-				degrees = (90 - (180f / Math.PI) * Math.acos(mScrollPositionOffset)) / 2;
+				degrees = (90/SWIPE_ROTATION_SCALE) - (RADIANS * Math.acos(mScrollPositionOffset)) / SWIPE_ROTATION_SCALE;
 			}
 			final float translateZ = (float) (SWIPE_Z_DISTANCE * Math.sin((Math.PI) * mScrollPositionOffset));
 
