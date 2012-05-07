@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ViewPager3D">
+        <attr name="overscroll_rotation" format="float"/>
+        <attr name="overscroll_translation" format="integer"/>
+        <attr name="swipe_rotation" format="float"/>
+        <attr name="swipe_translation" format="integer"/>
+        <attr name="overscroll_animation_duration" format="integer"/>
+        </declare-styleable>
+
+</resources>
