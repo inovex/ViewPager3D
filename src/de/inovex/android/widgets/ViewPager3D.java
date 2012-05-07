@@ -22,7 +22,7 @@ public class ViewPager3D extends ViewPager {
 	 * maximum overscroll rotation of the children is 90 /
 	 * OVERSCROLL_ROTATION_SCALE degrees
 	 */
-	final static float OVERSCROLL_ROTATION_SCALE = 3f;
+	final static float OVERSCROLL_ROTATION_SCALE = 2f;
 
 	/**
 	 * maximum z distance to translate child view

@@ -52,7 +52,6 @@ public class ViewPagerActivity extends Activity {
 		@Override
 		public Object instantiateItem(View collection, int position) {
 			TextView tv = (TextView) mInflater.inflate(R.layout.page_item, null);
-			tv.setDrawingCacheBackgroundColor(Color.BLACK);
 			// tv.setBackgroundColor(Color.argb(255, 255-r, 255-g, 255-b));
 			// tv.setCompoundDrawables(left, top, right, bottom)
 			((ViewPager) collection).addView(tv);
