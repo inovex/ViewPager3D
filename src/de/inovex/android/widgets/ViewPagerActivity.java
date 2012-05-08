@@ -24,14 +24,14 @@ public class ViewPagerActivity extends Activity {
 		setContentView(R.layout.main);
 		ViewPager pager = (ViewPager) findViewById(R.id.awesomepager);
 		pager.setAdapter(new AwesomePagerAdapter());
-		mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);		
 	}
 
 	private class AwesomePagerAdapter extends PagerAdapter {
 
 		@Override
 		public int getCount() {
-			return 4;
+			return 3;
 		}
 
 		/**

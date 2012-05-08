@@ -2,6 +2,7 @@
 <de.inovex.android.widgets.ViewPager3D xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res/de.inovex.android.widgets"  
     android:id="@+id/awesomepager"
+    app:animate_alpha="false"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
     <!--

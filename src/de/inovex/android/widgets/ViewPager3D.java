@@ -3,6 +3,9 @@ package de.inovex.android.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Camera;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v4.view.ViewPager;
@@ -22,28 +25,32 @@ public class ViewPager3D extends ViewPager {
 	/**
 	 * maximum overscroll rotation of the children is 90 divided by this value
 	 */
-	final static float OVERSCROLL_ROTATION = 2f;
+	final static float DEFAULT_OVERSCROLL_ROTATION = 2f;
 
 	/**
 	 * maximum z distance to translate child view
 	 */
-	final static int OVERSCROLL_TRANSLATION = 150;
-	
+	final static int DEFAULT_OVERSCROLL_TRANSLATION = 150;
+
 	/**
 	 * maximum z distanze during swipe
 	 */
-	final static int SWIPE_TRANSLATION = 100;
-	
+	final static int DEFAULT_SWIPE_TRANSLATION = 100;
+
 	/**
 	 * maximum rotation during swipe is 90 divided by this value
 	 */
-	final static float SWIPE_ROTATION = 3;
+	final static float DEFAULT_SWIPE_ROTATION = 3;
 
 	/**
 	 * duration of overscroll animation in ms
 	 */
-	final private static int OVERSCROLL_ANIMATION_DURATION = 400;
+	final private static int DEFAULT_OVERSCROLL_ANIMATION_DURATION = 400;
 
+	/**
+	 * if true alpha of children gets animated during swipe and overscroll
+	 */
+	final private static boolean DEFAULT_ANIMATE_ALPHA = true;
 
 	@SuppressWarnings("unused")
 	private final static String DEBUG_TAG = ViewPager.class.getSimpleName();
@@ -103,7 +110,7 @@ public class ViewPager3D extends ViewPager {
 			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll, target);
 			mAnimator.setInterpolator(new DecelerateInterpolator());
 			final float scale = Math.abs(target - mOverscroll);
-			mAnimator.setDuration((long) (OVERSCROLL_ANIMATION_DURATION * scale));
+			mAnimator.setDuration((long) (DEFAULT_OVERSCROLL_ANIMATION_DURATION * scale));
 			mAnimator.start();
 		}
 
@@ -129,12 +136,13 @@ public class ViewPager3D extends ViewPager {
 	private int mScrollPosition;
 	private float mScrollPositionOffset;
 	final private int mTouchSlop;
-	
+
 	private float mOverscrollRotation;
 	private float mSwipeRotation;
 	private int mOverscrollTranslation;
 	private int mSwipeTranslation;
 	private int mOverscrollAnimationDuration;
+	private boolean mAnimateAlpha;
 
 	public ViewPager3D(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -144,67 +152,65 @@ public class ViewPager3D extends ViewPager {
 		super.setOnPageChangeListener(new MyOnPageChangeListener());
 		init(attrs);
 	}
-	
 
 	private void init(AttributeSet attrs) {
 		TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ViewPager3D);
-		mOverscrollRotation = a.getFloat(R.styleable.ViewPager3D_overscroll_rotation, OVERSCROLL_ROTATION);
-		mSwipeRotation = a.getFloat(R.styleable.ViewPager3D_swipe_rotation, SWIPE_ROTATION);
-		mSwipeTranslation = a.getInt(R.styleable.ViewPager3D_swipe_translation, SWIPE_TRANSLATION);
-		mOverscrollTranslation = a.getInt(R.styleable.ViewPager3D_overscroll_translation, OVERSCROLL_TRANSLATION);
-		mOverscrollAnimationDuration = a.getInt(R.styleable.ViewPager3D_overscroll_animation_duration, OVERSCROLL_ANIMATION_DURATION);
+		mOverscrollRotation = a.getFloat(R.styleable.ViewPager3D_overscroll_rotation, DEFAULT_OVERSCROLL_ROTATION);
+		mSwipeRotation = a.getFloat(R.styleable.ViewPager3D_swipe_rotation, DEFAULT_SWIPE_ROTATION);
+		mSwipeTranslation = a.getInt(R.styleable.ViewPager3D_swipe_translation, DEFAULT_SWIPE_TRANSLATION);
+		mOverscrollTranslation = a.getInt(R.styleable.ViewPager3D_overscroll_translation, DEFAULT_OVERSCROLL_TRANSLATION);
+		mOverscrollAnimationDuration = a.getInt(R.styleable.ViewPager3D_overscroll_animation_duration, DEFAULT_OVERSCROLL_ANIMATION_DURATION);
+		mAnimateAlpha = a.getBoolean(R.styleable.ViewPager3D_animate_alpha, DEFAULT_ANIMATE_ALPHA);
 		a.recycle();
+	}
+
+	public boolean isAnimateAlpha() {
+		return mAnimateAlpha;
+	}
+
+	public void setAnimateAlpha(boolean mAnimateAlpha) {
+		this.mAnimateAlpha = mAnimateAlpha;
 	}
 
 	public int getOverscrollAnimationDuration() {
 		return mOverscrollAnimationDuration;
 	}
 
-
 	public void setOverscrollAnimationDuration(int mOverscrollAnimationDuration) {
 		this.mOverscrollAnimationDuration = mOverscrollAnimationDuration;
 	}
-
 
 	public int getSwipeTranslation() {
 		return mSwipeTranslation;
 	}
 
-
 	public void setSwipeTranslation(int mSwipeTranslation) {
 		this.mSwipeTranslation = mSwipeTranslation;
 	}
-
 
 	public int getOverscrollTranslation() {
 		return mOverscrollTranslation;
 	}
 
-
 	public void setOverscrollTranslation(int mOverscrollTranslation) {
 		this.mOverscrollTranslation = mOverscrollTranslation;
 	}
-
 
 	public float getSwipeRotation() {
 		return mSwipeRotation;
 	}
 
-
 	public void setSwipeRotation(float mSwipeRotation) {
 		this.mSwipeRotation = mSwipeRotation;
 	}
-
 
 	public float getOverscrollRotation() {
 		return mOverscrollRotation;
 	}
 
-
 	public void setOverscrollRotation(float mOverscrollRotation) {
 		this.mOverscrollRotation = mOverscrollRotation;
 	}
-
 
 	@Override
 	public void setOnPageChangeListener(OnPageChangeListener listener) {
@@ -363,6 +369,11 @@ public class ViewPager3D extends ViewPager {
 			t.getMatrix().preTranslate(-dx, -dy);
 			t.getMatrix().postTranslate(dx, dy);
 
+			if (mAnimateAlpha) {
+				t.setTransformationType(Transformation.TYPE_BOTH);
+				t.setAlpha((float) (Math.sin((1 - Math.abs(mOverscrollEffect.mOverscroll)) * Math.PI / 2)));
+			}
+
 			return true;
 		} else if (mScrollPositionOffset > 0) {
 
@@ -371,11 +382,19 @@ public class ViewPager3D extends ViewPager {
 
 			final double degrees;
 			if (position > mScrollPosition) {
+				if (mAnimateAlpha) {
+					t.setTransformationType(Transformation.TYPE_BOTH);
+					t.setAlpha((float) (Math.sin(mScrollPositionOffset * Math.PI / 2)));
+				}
 				// right side
-				degrees = -(90/mSwipeRotation) + (RADIANS * Math.acos(1 - mScrollPositionOffset)) / mSwipeRotation;
+				degrees = -(90 / mSwipeRotation) + (RADIANS * Math.acos(1 - mScrollPositionOffset)) / mSwipeRotation;
 			} else {
+				if (mAnimateAlpha) {
+					t.setTransformationType(Transformation.TYPE_BOTH);
+					t.setAlpha((float) (Math.sin(mScrollPositionOffset * Math.PI / 2 + Math.PI / 2)));
+				}
 				// left side
-				degrees = (90/mSwipeRotation) - (RADIANS * Math.acos(mScrollPositionOffset)) / mSwipeRotation;
+				degrees = (90 / mSwipeRotation) - (RADIANS * Math.acos(mScrollPositionOffset)) / mSwipeRotation;
 			}
 			final float translateZ = (float) (mSwipeTranslation * Math.sin((Math.PI) * mScrollPositionOffset));
 

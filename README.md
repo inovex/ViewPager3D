@@ -1,9 +1,9 @@
 
 # ViewPager 3D
 
-![Screenshot 1](https://github.com/renard314/ViewPager3D/raw/master/screenshot1.png)
-![Screenshot 1](https://github.com/renard314/ViewPager3D/raw/master/screenshot2.png)
-![Screenshot 1](https://github.com/renard314/ViewPager3D/raw/master/screenshot3.png)
+![Screenshot 1](https://github.com/inovex/ViewPager3D/raw/master/screenshot1.png)
+![Screenshot 1](https://github.com/inovex/ViewPager3D/raw/master/screenshot2.png)
+![Screenshot 1](https://github.com/inovex/ViewPager3D/raw/master/screenshot3.png)
 
 This project aims to provide a reusable ViewPager widget for Android. It is based on the ViewPager class from Androids V4 compatibility package. Because of that android-support-v4.jar needs to be included in the build path.
 
@@ -16,8 +16,7 @@ This project aims to provide a reusable ViewPager widget for Android. It is base
 
  * 3D overscroll effect
  * 3D swipe effect 
-
-Repository at <https://github.com/renard314/ViewPager3D>.
+ * subtle fade out during swipe and over scroll
 
 ## Usage
 
@@ -50,6 +49,7 @@ All attributes are optional.
  * **swipe_rotation** (float). Controls maximum rotation during swipe. Maximum rotation angle is 90 degrees divided by this value. Default is 3.
  * **swipe_translation** (integer): Maximum z-translation during swipe. Default = 100.
  * **overscroll_animation_duration** (integer): Duration of animation when user releases the over scroll. Default is 400 ms.
+ * **animate_alpha** (boolean): if true the alpha value of the children views is decreased as they scroll out of the screen. Default is false because of performance issues.
 
 
 ### Activity

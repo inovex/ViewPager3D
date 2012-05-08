@@ -7,6 +7,7 @@
         <attr name="swipe_rotation" format="float"/>
         <attr name="swipe_translation" format="integer"/>
         <attr name="overscroll_animation_duration" format="integer"/>
+        <attr name="animate_alpha" format="boolean"/>
         </declare-styleable>
 
 </resources>
