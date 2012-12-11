@@ -4,6 +4,5 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry exported="true" kind="lib" path="/Users/renard/Desktop/devel/android-sdk-mac_x86/extras/android/compatibility/v4/android-support-v4.jar" sourcepath="/Users/renard/Desktop/devel/android-sdk-mac_x86/extras/android/compatibility/v4"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

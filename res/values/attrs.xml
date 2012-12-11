@@ -2,12 +2,22 @@
 <resources>
 
     <declare-styleable name="ViewPager3D">
-        <attr name="overscroll_rotation" format="float"/>
-        <attr name="overscroll_translation" format="integer"/>
-        <attr name="swipe_rotation" format="float"/>
-        <attr name="swipe_translation" format="integer"/>
-        <attr name="overscroll_animation_duration" format="integer"/>
-        <attr name="animate_alpha" format="boolean"/>
-        </declare-styleable>
+
+        <!-- Determines the amount of rotation during over scroll. Maximum rotation angle is 90 degrees divided by thisÏ value. Default is 2 -->
+        <attr name="overscroll_rotation" format="float" />
+        <!--
+        determines the maximum amount of translation along the z-axis during the overscroll. 
+        Default is 150.
+        -->
+        <attr name="overscroll_translation" format="integer" />
+        <!-- Controls maximum rotation during swipe. Maximum rotation angle is 90 degrees divided by this value. Default is 3. -->
+        <attr name="swipe_rotation" format="float" />
+        <!-- Maximum z-translation during swipe. Default = 100. -->
+        <attr name="swipe_translation" format="integer" />
+        <!-- Duration of animation when user releases the over scroll. Default is 400 ms. -->
+        <attr name="overscroll_animation_duration" format="integer" />
+        <!-- if true the alpha value of the children views is decreased as they scroll out of the screen. Default is false because of performance issues -->
+        <attr name="animate_alpha" format="boolean" />
+    </declare-styleable>
 
 </resources>
