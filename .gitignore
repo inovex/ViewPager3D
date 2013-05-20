@@ -3,4 +3,7 @@
 obj/*
 bin/*
 gen/*
-libs/*
+local.properties
+build.xml
+.classpath
+project.properties
