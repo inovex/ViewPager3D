@@ -3,4 +3,5 @@
 obj/*
 bin/*
 gen/*
-libs/*
+.classpath
+.project
