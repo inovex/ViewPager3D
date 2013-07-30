@@ -118,9 +118,11 @@ public class ViewPager3D extends ViewPager {
 			if (mScrollPosition == 0 && mOverscroll < 0) {
 				return true;
 			}
-			final boolean isLast = (getAdapter().getCount() - 1) == mScrollPosition;
-			if (isLast && mOverscroll > 0) {
-				return true;
+			if (getAdapter() != null) {
+				final boolean isLast = (getAdapter().getCount() - 1) == mScrollPosition;
+				if (isLast && mOverscroll > 0) {
+					return true;
+				}
 			}
 			return false;
 		}
@@ -233,6 +235,7 @@ public class ViewPager3D extends ViewPager {
 			getChildAt(i).invalidate();
 
 		}
+		invalidate();
 		// final View child = getChildAt(position);
 		// final View previous = getChildAt(position - 1);
 		// final View next = getChildAt(position + 1);
