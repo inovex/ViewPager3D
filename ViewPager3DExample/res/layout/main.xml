@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:app1="http://schemas.android.com/apk/res/de.inovex.android.widgets"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <!--
+    <com.viewpagerindicator.TitlePageIndicator
+        android:id="@+id/titles"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <com.viewpagerindicator.TabPageIndicator
+        android:id="@+id/tabs"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <com.viewpagerindicator.CirclePageIndicator
+        android:id="@+id/circles"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    -->
+
+    <de.inovex.android.widgets.ViewPager3D
+        android:id="@+id/awesomepager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:animate_alpha="false"
+        app:overscroll_rotation="6"
+        app:overscroll_translation="50"
+        app:swipe_rotation="2"
+        app:swipe_translation="50" />
+
+</LinearLayout><!--
+    <android.support.v4.view.ViewPager
+    	xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/awesomepager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+-->
