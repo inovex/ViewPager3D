@@ -1,9 +1,8 @@
-*/.settings/
+.settings/
 .DS_Store
-*/obj/*
-*/bin/*
-*/gen/*
-*/local.properties
-*/build.xml
-*/.classpath
+bin/*
+gen/*
+local.properties
+build.xml
+.classpath
 project.properties
