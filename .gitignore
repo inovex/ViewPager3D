@@ -1,7 +1,8 @@
 .settings/
 .DS_Store
-bin/*
-gen/*
+**/bin/
+**/gen/
+**/target/
 local.properties
 build.xml
 .classpath

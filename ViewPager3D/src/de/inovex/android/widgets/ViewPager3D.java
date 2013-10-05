@@ -390,7 +390,12 @@ public class ViewPager3D extends ViewPager {
 		if (mOverscrollEffect.isOverscrolling() && !callSuper) {
 			return true;
 		} else {
-			return super.onTouchEvent(ev);
+			try {
+				return super.onTouchEvent(ev);
+			} catch (IllegalArgumentException ignore) {
+			} catch (ArrayIndexOutOfBoundsException ignore) {
+			}
+			return false;
 		}
 	}
 

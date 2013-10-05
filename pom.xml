@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <groupId>de.renardwellnitz.android</groupId>
+  <artifactId>parent</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0</version>
+
+  <name>ViewPager3D (Parent)</name>
+
+  <modules>
+    <module>ViewPager3D</module>
+  </modules>
+
+    <developers>
+        <developer>
+            <id>renardwellnitz</id>
+            <name>Renard Wellnitz</name>
+            <email>renard.wellnitz@googlemail.com</email>
+        </developer>
+    </developers>    
+    
+  <licenses>
+    <license>
+      <name>Apache License Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <android-platform>18</android-platform>
+      <android-maven-plugin-version>3.6.0</android-maven-plugin-version>
+      <com.google.android-version>4.0.1.2</com.google.android-version>
+      <android-support.version>r18.1</android-support.version>
+      <nineoldandroids.version>2.4.0</nineoldandroids.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>android</artifactId>
+        <version>${com.google.android-version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android</groupId>
+        <artifactId>support-v4</artifactId>
+        <version>${android-support.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.nineoldandroids</groupId>
+        <artifactId>library</artifactId>
+        <version>${nineoldandroids.version}</version>
+      </dependency>     
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+            <version>${android-maven-plugin-version}</version>
+          <configuration>
+            <nativeLibrariesDirectory>ignored</nativeLibrariesDirectory>
+            <sdk>
+              <platform>${android-platform}</platform>
+            </sdk>
+          </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
