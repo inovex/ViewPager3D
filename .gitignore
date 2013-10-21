@@ -1,6 +1,9 @@
 .settings/
 .DS_Store
-obj/*
-bin/*
-gen/*
-libs/*
+**/bin/
+**/gen/
+**/target/
+local.properties
+build.xml
+.classpath
+project.properties
