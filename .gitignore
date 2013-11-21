@@ -3,6 +3,7 @@
 **/bin/
 **/gen/
 **/target/
+**/build/
 local.properties
 build.xml
 .classpath
