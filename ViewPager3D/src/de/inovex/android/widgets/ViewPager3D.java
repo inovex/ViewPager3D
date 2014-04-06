@@ -3,6 +3,7 @@ package de.inovex.android.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Camera;
+import android.graphics.Rect;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v4.view.ViewPager;
@@ -56,21 +57,18 @@ public class ViewPager3D extends ViewPager {
 	private final static double RADIANS = 180f / Math.PI;
 
 	/**
-	 * 
 	 * @author renard
-	 * 
 	 */
 	private class OverscrollEffect {
 		private float mOverscroll;
 		private Animator mAnimator;
 
 		/**
-		 * @param deltaDistance
-		 *            [0..1] 0->no overscroll, 1>full overscroll
+		 * @param deltaDistance [0..1] 0->no overscroll, 1>full overscroll
 		 */
 		public void setPull(final float deltaDistance) {
 			mOverscroll = deltaDistance;
-			invalidateVisibleChilds(mLastPosition);
+			invalidateVisibleChilds();
 		}
 
 		/**
@@ -105,12 +103,10 @@ public class ViewPager3D extends ViewPager {
 		}
 
 		private void startAnimation(final float target) {
-			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll,
-					target);
+			mAnimator = ObjectAnimator.ofFloat(this, "pull", mOverscroll, target);
 			mAnimator.setInterpolator(new DecelerateInterpolator());
 			final float scale = Math.abs(target - mOverscroll);
-			mAnimator
-					.setDuration((long) (mOverscrollAnimationDuration * scale));
+			mAnimator.setDuration((long) (mOverscrollAnimationDuration * scale));
 			mAnimator.start();
 		}
 
@@ -137,6 +133,7 @@ public class ViewPager3D extends ViewPager {
 	private int mActivePointerId;
 	private int mScrollPosition;
 	private float mScrollPositionOffset;
+	private int mScrollPositionOffsetPixels;
 	final private int mTouchSlop;
 
 	private float mOverscrollRotation;
@@ -145,13 +142,13 @@ public class ViewPager3D extends ViewPager {
 	private int mSwipeTranslation;
 	private int mOverscrollAnimationDuration;
 	private boolean mAnimateAlpha;
+	private Rect mTempTect = new Rect();
 
 	public ViewPager3D(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setStaticTransformationsEnabled(true);
 		final ViewConfiguration configuration = ViewConfiguration.get(context);
-		mTouchSlop = ViewConfigurationCompat
-				.getScaledPagingTouchSlop(configuration);
+		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
 		super.setOnPageChangeListener(new MyOnPageChangeListener());
 		init(attrs);
 	}
@@ -228,43 +225,37 @@ public class ViewPager3D extends ViewPager {
 	@Override
 	public void setOnPageChangeListener(OnPageChangeListener listener) {
 		mScrollListener = listener;
-	};
-
-	private void invalidateVisibleChilds(final int position) {
-		for (int i = 0; i < getChildCount(); i++) {
-			getChildAt(i).invalidate();
-
-		}
-		invalidate();
-		// final View child = getChildAt(position);
-		// final View previous = getChildAt(position - 1);
-		// final View next = getChildAt(position + 1);
-		// if (child != null) {
-		// child.invalidate();
-		// }
-		// if (previous != null) {
-		// previous.invalidate();
-		// }
-		// if (next != null) {
-		// next.invalidate();
-		// }
 	}
 
-	private int mLastPosition = 0;
+	;
+
+	private void invalidateVisibleChilds() {
+		for (int i = 0; i < getChildCount(); i++) {
+			final View childAt = getChildAt(i);
+			childAt.getLocalVisibleRect(mTempTect);
+			final int area = mTempTect.width() * mTempTect.height();
+			if (area > 0) {
+				childAt.invalidate();
+			}
+		}
+
+		invalidate();
+	}
 
 	private class MyOnPageChangeListener implements OnPageChangeListener {
 
 		@Override
-		public void onPageScrolled(int position, float positionOffset,
-				int positionOffsetPixels) {
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 			if (mScrollListener != null) {
-				mScrollListener.onPageScrolled(position, positionOffset,
-						positionOffsetPixels);
+				mScrollListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
 			}
 			mScrollPosition = position;
 			mScrollPositionOffset = positionOffset;
-			mLastPosition = position;
-			invalidateVisibleChilds(position);
+			mScrollPositionOffsetPixels = positionOffsetPixels;
+			//Log.i(DEBUG_TAG, "mScrollPosition = " + position + " offset = " + String.format("%f.2", positionOffset));
+			//Log.i(DEBUG_TAG, "onPageScrolled");
+
+			invalidateVisibleChilds();
 		}
 
 		@Override
@@ -289,21 +280,22 @@ public class ViewPager3D extends ViewPager {
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
 		final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
 		switch (action) {
-		case MotionEvent.ACTION_DOWN: {
-			mLastMotionX = ev.getX();
-			mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-			break;
-		}
-		case MotionEventCompat.ACTION_POINTER_DOWN: {
-			final int index = MotionEventCompat.getActionIndex(ev);
-			final float x = MotionEventCompat.getX(ev, index);
-			mLastMotionX = x;
-			mActivePointerId = MotionEventCompat.getPointerId(ev, index);
-			break;
-		}
+			case MotionEvent.ACTION_DOWN: {
+				mLastMotionX = ev.getX();
+				mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+				break;
+			}
+			case MotionEventCompat.ACTION_POINTER_DOWN: {
+				final int index = MotionEventCompat.getActionIndex(ev);
+				final float x = MotionEventCompat.getX(ev, index);
+				mLastMotionX = x;
+				mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+				break;
+			}
 		}
 		return super.onInterceptTouchEvent(ev);
 	}
+
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
@@ -311,80 +303,72 @@ public class ViewPager3D extends ViewPager {
 
 		final int action = ev.getAction();
 		switch (action) {
-		case MotionEvent.ACTION_DOWN: {
-			callSuper = true;
-			mLastMotionX = ev.getX();
-			mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-			break;
-		}
-		case MotionEventCompat.ACTION_POINTER_DOWN: {
-			callSuper = true;
-			final int index = MotionEventCompat.getActionIndex(ev);
-			final float x = MotionEventCompat.getX(ev, index);
-			mLastMotionX = x;
-			mActivePointerId = MotionEventCompat.getPointerId(ev, index);
-			break;
-		}
-		case MotionEvent.ACTION_MOVE: {
-			if (mActivePointerId != INVALID_POINTER_ID) {
-				// Scroll to follow the motion event
-				final int activePointerIndex = MotionEventCompat
-						.findPointerIndex(ev, mActivePointerId);
-				final float x = MotionEventCompat.getX(ev, activePointerIndex);
-				final float deltaX = mLastMotionX - x;
-				final float oldScrollX = getScrollX();
-				final int width = getWidth();
-				final int widthWithMargin = width + getPageMargin();
-				final int lastItemIndex = getAdapter().getCount() - 1;
-				final int currentItemIndex = getCurrentItem();
-				final float leftBound = Math.max(0, (currentItemIndex - 1)
-						* widthWithMargin);
-				final float rightBound = Math.min(currentItemIndex + 1,
-						lastItemIndex) * widthWithMargin;
-				final float scrollX = oldScrollX + deltaX;
-				if (mScrollPositionOffset == 0) {
-					if (scrollX < leftBound) {
-						if (leftBound == 0) {
-							final float over = deltaX + mTouchSlop;
-							mOverscrollEffect.setPull(over / width);
+			case MotionEvent.ACTION_DOWN: {
+				callSuper = true;
+				mLastMotionX = ev.getX();
+				mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+				break;
+			}
+			case MotionEventCompat.ACTION_POINTER_DOWN: {
+				callSuper = true;
+				final int index = MotionEventCompat.getActionIndex(ev);
+				final float x = MotionEventCompat.getX(ev, index);
+				mLastMotionX = x;
+				mActivePointerId = MotionEventCompat.getPointerId(ev, index);
+				break;
+			}
+			case MotionEvent.ACTION_MOVE: {
+				if (mActivePointerId != INVALID_POINTER_ID) {
+					// Scroll to follow the motion event
+					final int activePointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+					final float x = MotionEventCompat.getX(ev, activePointerIndex);
+					final float deltaX = mLastMotionX - x;
+					final int width = getWidth();
+					final int widthWithMargin = width + getPageMargin();
+					final int lastItemIndex = getAdapter().getCount() - 1;
+					final int currentItemIndex = getCurrentItem();
+					final float leftBound = Math.max(0, (currentItemIndex - 1) * widthWithMargin);
+					final float rightBound = Math.min(currentItemIndex + 1, lastItemIndex) * widthWithMargin;
+					if (mScrollPositionOffset == 0) {
+						if (currentItemIndex == 0) {
+							if (leftBound == 0) {
+								final float over = deltaX + mTouchSlop;
+								mOverscrollEffect.setPull(over / width);
+							}
+						} else if (lastItemIndex == currentItemIndex) {
+							if (rightBound == lastItemIndex * widthWithMargin) {
+								final float over = deltaX - mTouchSlop;
+								mOverscrollEffect.setPull(over / width);
+							}
 						}
-					} else if (scrollX > rightBound) {
-						if (rightBound == lastItemIndex * widthWithMargin) {
-							final float over = scrollX - rightBound
-									- mTouchSlop;
-							mOverscrollEffect.setPull(over / width);
-						}
+					} else {
+						mLastMotionX = x;
 					}
 				} else {
-					mLastMotionX = x;
+					mOverscrollEffect.onRelease();
 				}
-			} else {
-				mOverscrollEffect.onRelease();
+				break;
 			}
-			break;
-		}
-		case MotionEvent.ACTION_UP:
-		case MotionEvent.ACTION_CANCEL: {
-			callSuper = true;
-			mActivePointerId = INVALID_POINTER_ID;
-			mOverscrollEffect.onRelease();
-			break;
-		}
-		case MotionEvent.ACTION_POINTER_UP: {
-			final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-			final int pointerId = MotionEventCompat.getPointerId(ev,
-					pointerIndex);
-			if (pointerId == mActivePointerId) {
-				// This was our active pointer going up. Choose a new
-				// active pointer and adjust accordingly.
-				final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-				mLastMotionX = ev.getX(newPointerIndex);
-				mActivePointerId = MotionEventCompat.getPointerId(ev,
-						newPointerIndex);
+			case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_CANCEL: {
 				callSuper = true;
+				mActivePointerId = INVALID_POINTER_ID;
+				mOverscrollEffect.onRelease();
+				break;
 			}
-			break;
-		}
+			case MotionEvent.ACTION_POINTER_UP: {
+				final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+				if (pointerId == mActivePointerId) {
+					// This was our active pointer going up. Choose a new
+					// active pointer and adjust accordingly.
+					final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+					mLastMotionX = ev.getX(newPointerIndex);
+					mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+					callSuper = true;
+				}
+				break;
+			}
 		}
 
 		if (mOverscrollEffect.isOverscrolling() && !callSuper) {
@@ -399,24 +383,21 @@ public class ViewPager3D extends ViewPager {
 		}
 	}
 
+
 	@Override
 	protected boolean getChildStaticTransformation(View child, Transformation t) {
 		if (child.getWidth() == 0) {
 			return false;
 		}
-		final int position = child.getLeft() / child.getWidth();
-		final boolean isFirstOrLast = position == 0
-				|| (position == getAdapter().getCount() - 1);
+
+
+		final boolean isFirstOrLast = mScrollPosition == 0 || (mScrollPosition == (getAdapter().getCount() - 1));
 		if (mOverscrollEffect.isOverscrolling() && isFirstOrLast) {
 			final float dx = getWidth() / 2;
 			final int dy = getHeight() / 2;
 			t.getMatrix().reset();
-			final float translateZ = (float) (mOverscrollTranslation * Math
-					.sin(Math.PI * Math.abs(mOverscrollEffect.mOverscroll)));
-			final float degrees = 90
-					/ mOverscrollRotation
-					- (float) ((RADIANS * Math
-							.acos(mOverscrollEffect.mOverscroll)) / mOverscrollRotation);
+			final float translateZ = (float) (mOverscrollTranslation * Math.sin(Math.PI * Math.abs(mOverscrollEffect.mOverscroll)));
+			final float degrees = 90 / mOverscrollRotation - (float) ((RADIANS * Math.acos(mOverscrollEffect.mOverscroll)) / mOverscrollRotation);
 
 			mCamera.save();
 			mCamera.rotateY(degrees);
@@ -428,40 +409,39 @@ public class ViewPager3D extends ViewPager {
 
 			if (mAnimateAlpha) {
 				t.setTransformationType(Transformation.TYPE_BOTH);
-				t.setAlpha((FloatMath.sin((float) ((1 - Math
-						.abs(mOverscrollEffect.mOverscroll)) * Math.PI / 2))));
+				t.setAlpha((FloatMath.sin((float) ((1 - Math.abs(mOverscrollEffect.mOverscroll)) * Math.PI / 2))));
 			}
-			child.invalidate();
 			return true;
 		} else if (mScrollPositionOffset > 0) {
+
 
 			final float dx = getWidth() / 2;
 			final float dy = getHeight() / 2;
 
-			final double degrees;
-			if (position > mScrollPosition) {
+			double degrees = 0;
+			child.getLocalVisibleRect(mTempTect);
+
+			if (mTempTect.left >= mScrollPositionOffsetPixels) {
 				if (mAnimateAlpha) {
 					t.setTransformationType(Transformation.TYPE_BOTH);
 					t.setAlpha((FloatMath.sin((float) (mScrollPositionOffset
 							* Math.PI / 2))));
 				}
 				// right side
-				degrees = -(90 / mSwipeRotation)
-						+ (RADIANS * Math.acos(1 - mScrollPositionOffset))
-						/ mSwipeRotation;
-			} else {
+				degrees = (90 / mSwipeRotation) - (RADIANS * Math.acos(mScrollPositionOffset)) / mSwipeRotation;
+			} else if (mTempTect.left == 0) {
 				if (mAnimateAlpha) {
 					t.setTransformationType(Transformation.TYPE_BOTH);
 					t.setAlpha((FloatMath.sin((float) (mScrollPositionOffset
 							* Math.PI / 2 + Math.PI / 2))));
 				}
 				// left side
-				degrees = (90 / mSwipeRotation)
-						- (RADIANS * Math.acos(mScrollPositionOffset))
-						/ mSwipeRotation;
+				degrees = -(90 / mSwipeRotation) + (RADIANS * Math.acos(1 - mScrollPositionOffset)) / mSwipeRotation;
 			}
-			final float translateZ = (mSwipeTranslation * FloatMath
-					.sin((float) ((Math.PI) * mScrollPositionOffset)));
+
+
+			final float translateZ = (mSwipeTranslation * FloatMath.sin((float) ((Math.PI) * mScrollPositionOffset)));
+			//Log.i(DEBUG_TAG, visibleRect.left+ ", " + mScrollPositionOffsetPixels + ", degress = "+ String.format("%f.2", degrees));
 
 			t.getMatrix().reset();
 			mCamera.save();
@@ -472,7 +452,7 @@ public class ViewPager3D extends ViewPager {
 			// pivot point is center of child
 			t.getMatrix().preTranslate(-dx, -dy);
 			t.getMatrix().postTranslate(dx, dy);
-			child.invalidate();
+			//child.invalidate();
 			return true;
 		}
 		return false;
